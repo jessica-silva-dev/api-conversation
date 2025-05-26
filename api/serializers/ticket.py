@@ -3,11 +3,14 @@ from api.models import TicketModel
 
 class TicketSerializer(serializers.ModelSerializer):
     
-    name = serializers.SerializerMethodField()
+    agent = serializers.SerializerMethodField()
     
-    def get_name(self, obj):
-        return obj.contact.name
+    def get_agent(self, object):
+        from api.serializers.agent import AgentSerializer
     
+        if object.agent:
+            return AgentSerializer(object.agent, read_only=True).data
+        
     class Meta:
         model = TicketModel
-        fields = ['id', 'name', 'agent', 'status', 'created_at']
+        fields = ['id', 'status', 'created_at', 'agent']
