@@ -17,8 +17,8 @@ class Agent(models.Model):
     PROFILE_ATTENDANT = 'attendant'
     
     PROFILE_CHOICES = [
-        (PROFILE_ADMIN, 'Administrator'),
-        (PROFILE_ATTENDANT, 'Attendant'),
+        (PROFILE_ADMIN, 'administrator'),
+        (PROFILE_ATTENDANT, 'attendant'),
     ]
     
     STATUS_ONLINE = 'Online'
@@ -47,7 +47,7 @@ class TicketModel(models.Model):
     
     id = models.UUIDField(primary_key=True, editable=False, default=uuid.uuid4)
     contact = models.ForeignKey(Contact, on_delete=models.PROTECT)
-    agent = models.ForeignKey(to=Agent, on_delete=models.PROTECT, null=True)
+    agent = models.ForeignKey(to=Agent, on_delete=models.PROTECT, null=True, related_name='tickets')
     status = models.CharField(max_length=30, null=False, choices=STATUS_CHOICE, default='Open')
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     
