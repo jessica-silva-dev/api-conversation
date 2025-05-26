@@ -1,7 +1,7 @@
 from django.urls import path
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from api.views.contact import ContactListMessegesApiView, ContactApiView, ContactDetailApiView, ContactResetdApi
-from api.views.message import  MessageListCreateApiView, MessageDetailApiView, MessageListApiView, MessageResetApiView
+from api.views.message import  MessagesApiView, MessageCreateApiView, MessageDetailApiView, ContactMessageApiView, MessageResetApiView
 from .views.agent import AgentApiView, AgentDetailApiView, AgentResetApiview, AgentListTicketApiView
 from .views.ticket import TicketsOpenApiView, TicketsCurrentDayApiView
 
@@ -18,8 +18,9 @@ urlpatterns = [
     path('contact/reset/<str:identifier>', ContactResetdApi.as_view()),
     
     # Message
-    path('messages/', MessageListCreateApiView.as_view()),
-    path('message/list/<str:identifier>', MessageListApiView.as_view()),
+    path('messages/', MessagesApiView.as_view()),
+    path('message/create/', MessageCreateApiView.as_view()),
+    path('message/list/<str:identifier>', ContactMessageApiView.as_view()),
     path('message/detail/<str:ticket>', MessageDetailApiView.as_view()),
     path('message/reset/<str:ticket>', MessageResetApiView.as_view()),
     
