@@ -1,7 +1,6 @@
 from rest_framework import serializers
 from api.models import Agent, TicketModel
 from django.contrib.auth.models import User
-from .ticket import TicketSerializer
 
 class AgentSerializer(serializers.ModelSerializer):
     username = serializers.SerializerMethodField()
@@ -21,7 +20,12 @@ class AgentSerializer(serializers.ModelSerializer):
         
 class AgentTicketSerializer(serializers.ModelSerializer):
     
-    ticket = TicketSerializer(read_only=True)
+    ticket = serializers.SerializerMethodField()
+    
+    def get_ticket(self, obj):
+        from api.serializers.ticket import TicketSerializer
+        if obj.ticket:
+            return TicketSerializer(obj.ticket, read_only=True).data
     
     username = serializers.SerializerMethodField()
     
