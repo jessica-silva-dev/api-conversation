@@ -6,10 +6,12 @@ from django.contrib.auth.models import User
 from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.response import Response
+from django.core.exceptions import ValidationError
 from api.util.validate_phonenumber import ValidatePhone
+from matcher.views import TransferTicketAgent
 
 
-class MessageListCreateApiView(APIView):
+class MessagesApiView(APIView):
     #permission_classes = [IsAuthenticated]
     
     def get(self, request, *args, **kwargs):
@@ -19,6 +21,8 @@ class MessageListCreateApiView(APIView):
         serializer = MessageSerializer(messages, many=True)
         return Response(serializer.data, status.HTTP_200_OK)
     
+class MessageCreateApiView(APIView):
+    
     def post(self, request, *args, **kwargs):
         content = request.data.get('content')
         content_type = request.data.get('content_type')
@@ -27,27 +31,28 @@ class MessageListCreateApiView(APIView):
         user = request.data.get('user')
         
         if not all([content, content_type, identifier, name]):
-            return Response({'error: The fields content, content_type, identifier and is required'}, status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "The fields content, content_type, identifier and is required"}, status.HTTP_400_BAD_REQUEST)
         
         try:
-            try:
-                contact = Contact.objects.get(identifier=identifier)
+                    
+            validate_identifier = ValidatePhone.validate_phone_number(identifier)
                 
-            except Contact.DoesNotExist:
-                validate_identifier = ValidatePhone.validate_phone_number(identifier)
+            if not validate_identifier:
+                return Response({"error": "Invalid phone number"}, status.HTTP_400_BAD_REQUEST)
                 
-                if not validate_identifier:
-                    return Response({'error': 'Invalid phone number'}, status.HTTP_400_BAD_REQUEST)
+            contact, created = Contact.objects.get_or_create(
+                identifier = validate_identifier,
+                defaults={
+                    "name": name
+                }
+            )
                 
-                contact = Contact.objects.create(
-                    name = name,
-                    identifier = validate_identifier
-                )
-                        
+            agent = TransferTicketAgent()
+            
             ticket = TicketModel.objects.create(
                 contact = contact,
-                agent = None,
-                status = TicketModel.STATUS_OPEN
+                agent = agent.assign_agent_ticket(),
+                status = TicketModel.STATUS_OPEN,
                 )
             
             message = Message.objects.create(
@@ -59,7 +64,9 @@ class MessageListCreateApiView(APIView):
             serializer = MessageSerializer(message)
             return Response(serializer.data, status.HTTP_201_CREATED)
         except Exception as e:
-            return Response({'error': str(e)})
+            return Response({'error': str(e)}, status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except ValidationError as e:
+            return Response({"error": str(e)}, status.HTTP_500_INTERNAL_SERVER_ERROR)
     
 
 class MessageDetailApiView(APIView):
@@ -77,7 +84,7 @@ class MessageDetailApiView(APIView):
             return Response({'error': str(e)})
 
 
-class MessageListApiView(APIView):
+class ContactMessageApiView(APIView):
     #permission_classes = [IsAuthenticated]
     
     def get(self, request, *args, **kwargs):
