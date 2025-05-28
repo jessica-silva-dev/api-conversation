@@ -31,4 +31,8 @@ urlpatterns = [
     path('agent/tickets/<str:username>', AgentListTicketApiView.as_view()),
     
     #Ticket
+    path('tickets/open/', TicketsOpenApiView.as_view()),
+    path('tickets/open/day', TicketsCurrentDayApiView.as_view()),
+   
 ]
+
