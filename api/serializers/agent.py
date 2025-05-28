@@ -20,12 +20,12 @@ class AgentSerializer(serializers.ModelSerializer):
         
 class AgentTicketSerializer(serializers.ModelSerializer):
     
-    ticket = serializers.SerializerMethodField()
+    tickets = serializers.SerializerMethodField()
     
-    def get_ticket(self, obj):
+    def get_tickets(self, obj):
         from api.serializers.ticket import TicketSerializer
-        if obj.ticket:
-            return TicketSerializer(obj.ticket, read_only=True).data
+        tickets = obj.tickets.all()
+        return TicketSerializer(tickets, many=True, read_only=True).data
     
     username = serializers.SerializerMethodField()
     
@@ -40,5 +40,5 @@ class AgentTicketSerializer(serializers.ModelSerializer):
             'username',
             'profile', 
             'status', 
-            'ticket',
+            'tickets',
         ]
