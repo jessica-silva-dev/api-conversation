@@ -46,13 +46,10 @@ class MessageCreateApiView(APIView):
                     "name": name
                 }
             )
-                
-            agent = TransferTicketAgent()
             
-            ticket = TicketModel.objects.create(
+            ticket, created = TicketModel.objects.get_or_create(
                 contact = contact,
-                agent = agent.assign_agent_ticket(),
-                status = TicketModel.STATUS_OPEN,
+                status = TicketModel.STATUS_OPEN
                 )
             
             message = Message.objects.create(
