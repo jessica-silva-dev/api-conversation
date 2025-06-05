@@ -32,7 +32,7 @@ class Agent(models.Model):
     ]
     
     id = models.UUIDField(primary_key=True, editable=False, default=uuid.uuid4)
-    user = models.ForeignKey(to=User, on_delete=models.PROTECT)
+    user = models.ForeignKey(to=User, on_delete=models.PROTECT, related_name='agent')
     profile = models.CharField(max_length=50, choices=PROFILE_CHOICES)
     status = models.CharField(max_length=30, choices=STATUS_CHOICE)
         
@@ -62,6 +62,8 @@ class Message(models.Model):
         (CONTENT_TYPE_DOCS, 'Docs'),
         (CONTENT_TYPE_MEDIA, 'Media'),
     ]
+    # adc quem enviou a mensagem sender_type, contact ou agent, ter o id do remetente
+    # contact_id and agent_id
     
     ticket = models.ForeignKey(TicketModel, on_delete=models.PROTECT)
     content = models.TextField()
