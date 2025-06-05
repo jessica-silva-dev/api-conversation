@@ -92,6 +92,7 @@ class ContactResetdApi(APIView):
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response({"error": "payload is not valid"})
         except Exception as e:
             return Response({'error': str(e)})
         
