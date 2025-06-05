@@ -7,23 +7,28 @@ from rest_framework.permissions import IsAuthenticated
 from api.views.permission import IsProfileAdmin
 from datetime import datetime, timedelta
 from django.utils import timezone
+from matcher.views import TransferTicketAgent
 
 class TicketsOpenApiView(APIView):
     
     permission_classes = [IsAuthenticated]
     
     def get(self, request, *args, **kwargs):
+        try:
+            agent = request.user.agent.get()
+        except Agent.DoesNotExist:
+            return Response({"message":  "Nenhum agente associado a este usuário."}, status.HTTP_400_BAD_REQUEST)
         
-        agent = request.user.agent
-        
-        if agent.profile == Agent.PROFILE_ADMIN:
-            tickets = TicketModel.objects.filter(status=TicketModel.STATUS_OPEN)
-        else:
-            tickets = TicketModel.objects.filter(agent=agent, status=TicketModel.STATUS_OPEN)
-        
-        serializer = TicketSerializer(tickets, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-    
+        try:
+            if agent.profile == Agent.PROFILE_ADMIN:
+                tickets = TicketModel.objects.filter(status=TicketModel.STATUS_OPEN)
+            else:
+                tickets = TicketModel.objects.filter(agent=agent, status=TicketModel.STATUS_OPEN)
+            serializer = TicketSerializer(tickets, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
 class TicketsCurrentDayApiView(APIView):
     permission_classes = [IsAuthenticated, IsProfileAdmin]
     
@@ -36,16 +41,14 @@ class TicketsCurrentDayApiView(APIView):
         end_hour = day.replace(hour=23, minute=59, second=59)
         
         tickets = TicketModel.objects.filter(created_at__range=(start_hour, end_hour))
+
+class AssignedTicketAgent(APIView):
     
-    
-    '''
-    função: buscar todos os tickets do dia entre o horário de 00:00 até 23:59:59
-    
-    1° Pegar a data e a hora 
-    2° fazer um filtro com o intervalo de horario entre 00:00 e 23:59 hrs
-    
-    '''    
-    
-    
-    
-    
+    def patch(self, request, *args, **kwarags):
+        
+        try:
+            TransferTicketAgent().transfer_agents_online()
+            return Response({"message": "ok"},status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"message": str(e)}, status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
