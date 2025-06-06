@@ -7,6 +7,8 @@ class TransferTicketAgent():
     
     def transfer_agents_online(self):
         
+        print("executando ...")
+        
         tickets = TicketModel.objects.filter(agent__isnull=True, status='Open').order_by('created_at')
 
         if not tickets:
@@ -23,6 +25,7 @@ class TransferTicketAgent():
             ticket.agent = agent_more_free
             
         TicketModel.objects.bulk_update(tickets, ['agent'])
+        
             
     def get_agent_more_free(self, agents):
         
