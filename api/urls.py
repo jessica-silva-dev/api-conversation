@@ -3,7 +3,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from api.views.contact import ContactListMessegesApiView, ContactApiView, ContactDetailApiView, ContactResetdApi
 from api.views.message import  MessagesApiView, MessageCreateApiView, MessageDetailApiView, ContactMessageApiView, MessageResetApiView
 from .views.agent import AgentApiView, AgentDetailApiView, AgentResetApiview, AgentListTicketApiView
-from .views.ticket import TicketsOpenApiView, TicketsCurrentDayApiView
+from .views.ticket import TicketsOpenApiView, TicketsCurrentDayApiView, AssignedTicketAgent
 
 urlpatterns = [
     
@@ -33,6 +33,7 @@ urlpatterns = [
     #Ticket
     path('tickets/open/', TicketsOpenApiView.as_view()),
     path('tickets/open/day', TicketsCurrentDayApiView.as_view()),
+    path('ticket/transfer', AssignedTicketAgent.as_view()),
    
 ]
 
